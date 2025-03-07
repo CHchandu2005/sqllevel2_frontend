@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserCircle, Phone, Key, Database } from "lucide-react";
 import AuthContext from "../AuthContext";
 
+const Backend_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Login() {
   const { user, setUser } = useContext(AuthContext);

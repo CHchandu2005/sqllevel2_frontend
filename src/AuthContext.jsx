@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("usertoken");
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/login"); // Redirect to login
+    navigate("/"); // Redirect to login
   };
 
   useEffect(() => {
