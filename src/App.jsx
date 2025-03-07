@@ -5,7 +5,7 @@ import Login from './components/Login';
 import Instructions from './components/Instructions';
 import Quiz from './components/Quiz';
 import AuthContext from './AuthContext';
-import ThankYou from './components/Thankyou';
+import ThankYou from './components/ThankYou';
 
 // Navbar Component
 function Navbar() {
