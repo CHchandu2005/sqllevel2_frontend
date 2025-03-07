@@ -1,15 +1,16 @@
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Database } from 'lucide-react';
 import Login from './components/Login';
 import Instructions from './components/Instructions';
 import Quiz from './components/Quiz';
-import AuthContext from './AuthContext'; // Importing AuthContext
+import AuthContext from './AuthContext';
+import ThankYou from './components/Thankyou';
 
 // Navbar Component
 function Navbar() {
   const { user } = useContext(AuthContext);
-console.log("User in app.jsx",user)
+
   return (
     <nav className="border-b border-gray-800 bg-black/30 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,17 +32,73 @@ console.log("User in app.jsx",user)
     </nav>
   );
 }
-
-// AppRoutes Component
 function AppRoutes() {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  console.log("User:",user)
+  // Store the current path in localStorage to retain it after refresh
+  useEffect(() => {
+    localStorage.setItem('lastPath', location.pathname);
+  }, [location]);
+
+  // Redirect to the last path stored in localStorage after refresh
+  useEffect(() => {
+    if (user) {
+      console.log("User in App.jsx:",user);
+      const lastPath = localStorage.getItem('lastPath');
+      const timeleft = localStorage.getItem("quizTimeLeft");
+
+      // If timeleft exists, redirect to /quiz
+      if (timeleft) {
+        navigate("/quiz");
+      } else if (lastPath && lastPath !== location.pathname) {
+        navigate(lastPath);
+      }
+      setIsCheckingAuth(false); // Stop checking once user is available
+    }
+  }, [user, navigate, location.pathname]);
+
+  // Show a loading state while checking authentication
+  if ( user && isCheckingAuth) {
+    return <div>Loading...</div>; // Replace with your loading component
+  }
+
+  const timeleft = localStorage.getItem("quizTimeLeft");
+  console.log("Time left:", timeleft);
 
   return (
     <Routes>
-      <Route path="/" element={user ? <Navigate to="/instructions" replace /> : <Login />} />
-      <Route path="/instructions" element={user ? <Instructions /> : <Navigate to="/" replace />} />
+      <Route
+        path="/"
+        element={
+          user ? (
+            timeleft ? (
+              <Navigate to="/quiz" replace />
+            ) : (
+              <Navigate to="/instructions" replace />
+            )
+          ) : (
+            <Login />
+          )
+        }
+      />
+      <Route path="/thankyou" element={user ? <ThankYou /> : <Navigate to="/" replace />} />
+      <Route
+        path="/instructions"
+        element={
+          user ? (
+            timeleft ? (
+              <Navigate to="/quiz" replace />
+            ) : (
+              <Instructions />
+            )
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
       <Route path="/quiz" element={user ? <Quiz /> : <Navigate to="/" replace />} />
     </Routes>
   );
@@ -63,3 +120,4 @@ function App() {
 }
 
 export default App;
+

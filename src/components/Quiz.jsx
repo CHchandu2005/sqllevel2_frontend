@@ -1,181 +1,20 @@
-// import React, { useState, useEffect } from 'react';
-// import { Timer } from 'lucide-react';
-// const Backend_URL = import.meta.env.VITE_BACKEND_URL;
-// import { tableImages } from '../data';
-
-// function Quiz() {
-//   const [selectedTable, setSelectedTable] = useState(1);
-//   const [questions, setQuestions] = useState([]);
-//   const [answers, setAnswers] = useState({});
-//   const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
-//   const [isSubmitted, setIsSubmitted] = useState(false);
-
-//   useEffect(() => {
-//     // Fetch questions from backend
-//     const fetchQuestions = async () => {
-//       try {
-//         const token = localStorage.getItem('usertoken'); // Retrieve the token from localStorage
-    
-//         const response = await fetch(`${Backend_URL}/api/getquestions`, {
-//           method: 'GET',
-//           headers: {
-//             'Content-Type': 'application/json',
-//             'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-//           }
-//         });
-    
-//         if (!response.ok) {
-//           throw new Error('Failed to fetch questions');
-//         }
-    
-//         const data = await response.json();
-//         console.log("Data in quiz:", data);
-//         setQuestions(data.questions);
-//       } catch (error) {
-//         console.error('Error fetching questions:', error);
-//       }
-//     };
-
-//     fetchQuestions();
-
-//     // Load timer from localStorage if exists
-//     const savedTime = localStorage.getItem('quizTimeLeft');
-//     if (savedTime) {
-//       setTimeLeft(parseInt(savedTime));
-//     }
-
-//     const timer = setInterval(() => {
-//       setTimeLeft((prevTime) => {
-//         const newTime = prevTime - 1;
-//         localStorage.setItem('quizTimeLeft', newTime.toString());
-//         if (newTime <= 0) {
-//           handleSubmit();
-//         }
-//         return newTime;
-//       });
-//     }, 1000);
-
-//     return () => clearInterval(timer);
-//   }, []);
-
-//   const handleSubmit = () => {
-//     setIsSubmitted(true);
-//     localStorage.removeItem('quizTimeLeft');
-
-//     // Create an array of objects with question and user-provided answer
-//     const questionAnswerPairs = questions.map((question) => ({
-//       question: question.question,
-//       answer: answers[question.id] || 'No answer provided', // Use the answer from state or default to 'No answer provided'
-//     }));
-
-//     // Log the question-answer pairs to the console
-//     console.log(questionAnswerPairs);
-//   };
-
-//   const formatTime = (seconds) => {
-//     const minutes = Math.floor(seconds / 60);
-//     const remainingSeconds = seconds % 60;
-//     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-//   };
-
-//   const handleAnswerChange = (questionId, value) => {
-//     setAnswers((prev) => ({
-//       ...prev, // Keep previous answers intact
-//       [questionId]: value, // Update only the specific question
-//     }));
-//   };
-  
-
-//   if (isSubmitted) {
-//     return (
-//       <div className="text-center py-16">
-//         <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-cyan-300 bg-clip-text text-transparent">
-//           Thank You for Completing the Quiz!
-//         </h2>
-//         <p className="mt-4 text-gray-400">Your responses have been submitted successfully.</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="space-y-8">
-//       <div className="flex items-center justify-between bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-//         <div className="flex items-center space-x-2">
-//           <Timer className="h-5 w-5 text-red-400" />
-//           <span className="text-xl font-mono text-red-400">{formatTime(timeLeft)}</span>
-//         </div>
-//         <button
-//           onClick={handleSubmit}
-//           className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-//         >
-//           Submit Quiz
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-5 gap-4">
-//         {[1, 2, 3, 4, 5].map((tableNum) => (
-//           <button
-//             key={tableNum}
-//             onClick={() => setSelectedTable(tableNum)}
-//             className={`p-3 rounded-lg text-center transition-all ${
-//               selectedTable === tableNum
-//                 ? 'bg-blue-500 text-white'
-//                 : 'bg-gray-800/50 text-gray-400 hover:bg-gray-700/50'
-//             }`}
-//           >
-//             Table {tableNum}
-//           </button>
-//         ))}
-//       </div>
-
-//       <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-//         <img
-//           src={tableImages[selectedTable]}
-//           alt={`Table ${selectedTable}`}
-//           className="w-full h-64 object-cover rounded-lg"
-//         />
-//       </div>
-
-//       <div className="space-y-6">
-//         {questions
-//           // .filter((question) => question.tableRef === selectedTable)
-//           .map((question) => (
-//             <div
-//               key={question.id}
-//               className="bg-gray-800/50 p-6 rounded-xl border border-gray-700"
-//             >
-//               <p className="text-lg mb-3">{question.question}</p>
-//               <textarea
-//                 value={answers[question.id] || ''}
-//                 onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-//                 onPaste={(e) => e.preventDefault()}
-//                 onCopy={(e) => e.preventDefault()}
-//                 className="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
-//                 placeholder="Type your answer here..."
-//                 rows="3"
-//               />
-//             </div>
-//           ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Quiz;
-
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Timer } from "lucide-react";
 const Backend_URL = import.meta.env.VITE_BACKEND_URL;
 import { tableImages } from "../data";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../AuthContext";
+// const Backend_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 function Quiz() {
   const [selectedTable, setSelectedTable] = useState(1);
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState([]); // Store answers per question
-  const [timeLeft, setTimeLeft] = useState(20 * 60); // 20 minutes in seconds
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(0);
+  const { user } = useContext(AuthContext);
 
+const navigate = useNavigate();
   useEffect(() => {
     // Fetch questions from backend
     const fetchQuestions = async () => {
@@ -186,7 +25,7 @@ function Quiz() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include token in Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -204,38 +43,89 @@ function Quiz() {
 
     fetchQuestions();
 
-    // Load timer from localStorage if exists
+    // Initialize timer
     const savedTime = localStorage.getItem("quizTimeLeft");
     if (savedTime) {
       setTimeLeft(parseInt(savedTime));
+    } else {
+      localStorage.setItem("quizTimeLeft", (20 * 60).toString());
+      setTimeLeft(20 * 60);
     }
 
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         const newTime = prevTime - 1;
-        localStorage.setItem("quizTimeLeft", newTime.toString());
         if (newTime <= 0) {
           handleSubmit();
+          return 0; // Stop the timer at 0
         }
+        localStorage.setItem("quizTimeLeft", newTime.toString());
         return newTime;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  },[]);
 
-  const handleSubmit = () => {
-    setIsSubmitted(true);
-    localStorage.removeItem("quizTimeLeft");
-
-    // Create an array of objects with question and user-provided answer
-    const questionAnswerPairs = questions.map((question) => ({
-      question: question.question,
-      answer: answers[question.id] || "No answer provided",
-    }));
-
-    console.log("Submitted Answers:", questionAnswerPairs);
+  // const handleSubmit = () => {
+  //   localStorage.removeItem("quizTimeLeft");
+  //   console.log("Submitted Answers:", answers);
+  //   navigate("/thankyou")
+  // };
+  const handleSubmit = async () => {
+    try {
+      // Retrieve user token
+      const token = localStorage.getItem("usertoken");
+  
+      if (!token) {
+        console.error("No user token found");
+        return;
+      }
+  
+      // Retrieve user ID (if stored in localStorage or modify as needed)
+      const userId = user.teckziteid; // Example ID
+  
+      // Convert answers into the required format
+      const formattedAnswers = Object.entries(answers).map(([question, answer], index) => ({
+        question_no: index + 1,
+        question,
+        answer,
+      }));
+  
+      // Prepare payload
+      const payload = {
+        userID: userId,
+        questions: formattedAnswers,
+        time: timeLeft.toString(), // Send remaining time
+      };
+  
+      console.log("Payload being sent:", payload);
+  
+      // Send data to backend
+      const response = await fetch(`${Backend_URL}/api/submitquestions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to submit answers");
+      }
+  
+      const result = await response.json();
+      console.log("Submission Successful:", result);
+  
+      // Remove timer and navigate
+      localStorage.removeItem("quizTimeLeft");
+      navigate("/thankyou");
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+    }
   };
+  
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -245,28 +135,10 @@ function Quiz() {
 
   const handleAnswerChange = (questionId, value) => {
     setAnswers((prevAnswers) => ({
-      ...prevAnswers, // Keep previous answers
-      [questionId]: value, // Update only the current question
+      ...prevAnswers,
+      [questionId]: value,
     }));
   };
-
-  useEffect(() => {
-    console.log("Answers state updated:", answers);
-  }, [answers]);
-
-  if (isSubmitted) {
-    return (
-      <div className="text-center py-16">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-cyan-300 bg-clip-text text-transparent">
-          Thank You for Completing the Quiz!
-        </h2>
-        <p className="mt-4 text-gray-400">
-          Your responses have been submitted successfully.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       {/* Timer and Submit Button */}
@@ -320,8 +192,8 @@ function Quiz() {
           >
             <p className="text-lg mb-3">{question.question}</p>
             <textarea
-              value={answers[question.question_no] || ""}
-              onChange={(e) => handleAnswerChange(question.question_no, e.target.value)}
+              value={answers[question.question] || ""}
+              onChange={(e) => handleAnswerChange(question.question, e.target.value)}
               onPaste={(e) => e.preventDefault()}
               onCopy={(e) => e.preventDefault()}
               className="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
