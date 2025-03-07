@@ -96,7 +96,7 @@ const navigate = useNavigate();
       const payload = {
         userID: userId,
         questions: formattedAnswers,
-        time: timeLeft.toString(), // Send remaining time
+        time: (1200 - timeLeft).toString(), // Send remaining time
       };
   
       console.log("Payload being sent:", payload);
