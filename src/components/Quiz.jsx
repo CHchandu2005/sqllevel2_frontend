@@ -119,6 +119,7 @@ const navigate = useNavigate();
       console.log("Submission Successful:", result);
   
       // Remove timer and navigate
+      localStorage.removeItem("usertoken");
       localStorage.removeItem("quizTimeLeft");
       navigate("/thankyou");
     } catch (error) {
