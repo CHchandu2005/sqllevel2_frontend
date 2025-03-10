@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Timer } from "lucide-react";
-const Backend_URL = import.meta.env.VITE_BACKEND_URL;
 import { tableImages } from "../data";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../AuthContext";
-// const Backend_URL = import.meta.env.VITE_BACKEND_URL;
 
+const Backend_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Quiz() {
   const [selectedTable, setSelectedTable] = useState(1);
@@ -13,14 +12,13 @@ function Quiz() {
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-const navigate = useNavigate();
+  // Fetch questions and initialize timer
   useEffect(() => {
-    // Fetch questions from backend
     const fetchQuestions = async () => {
       try {
-        const token = localStorage.getItem("usertoken"); // Retrieve the token
-
+        const token = localStorage.getItem("usertoken");
         const response = await fetch(`${Backend_URL}/api/getquestions`, {
           method: "GET",
           headers: {
@@ -29,13 +27,17 @@ const navigate = useNavigate();
           },
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch questions");
-        }
+        if (!response.ok) throw new Error("Failed to fetch questions");
 
         const data = await response.json();
         console.log("Data in quiz:", data);
         setQuestions(data.questions);
+
+        // Load saved answers from localStorage
+        const savedAnswers = localStorage.getItem("quizAnswers");
+        if (savedAnswers) {
+          setAnswers(JSON.parse(savedAnswers));
+        }
       } catch (error) {
         console.error("Error fetching questions:", error);
       }
@@ -48,60 +50,58 @@ const navigate = useNavigate();
     if (savedTime) {
       setTimeLeft(parseInt(savedTime));
     } else {
-      localStorage.setItem("quizTimeLeft", (20 * 60).toString());
-      setTimeLeft(20 * 60);
+      localStorage.setItem("quizTimeLeft", (20*60).toString());
+      setTimeLeft(20*60);
     }
+  }, []);
 
+  // Timer logic
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
         const newTime = prevTime - 1;
         if (newTime <= 0) {
-          handleSubmit();
-          return 0; // Stop the timer at 0
+          clearInterval(timer); // Stop the timer
+          handleSubmit(answers); // Pass the latest answers to handleSubmit
+          return 0;
         }
         localStorage.setItem("quizTimeLeft", newTime.toString());
         return newTime;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  },[]);
+    return () => clearInterval(timer); // Cleanup timer on unmount
+  }, [answers]); // Re-run effect if answers change
 
-  // const handleSubmit = () => {
-  //   localStorage.removeItem("quizTimeLeft");
-  //   console.log("Submitted Answers:", answers);
-  //   navigate("/thankyou")
-  // };
-  const handleSubmit = async () => {
+  // Handle quiz submission
+  const handleSubmit = async (latestAnswers) => {
+    console.log("Handle submit function");
     try {
-      // Retrieve user token
       const token = localStorage.getItem("usertoken");
-  
       if (!token) {
         console.error("No user token found");
         return;
       }
-  
-      // Retrieve user ID (if stored in localStorage or modify as needed)
-      const userId = user.teckziteid; // Example ID
-  
-      // Convert answers into the required format
-      const formattedAnswers = Object.entries(answers).map(([question, answer], index) => ({
+
+      const userId = user.teckziteid;
+
+      console.log("Answers:", latestAnswers);
+
+      // Convert answers into required format
+      const formattedAnswers = Object.entries(latestAnswers).map(([question, answer], index) => ({
         question_no: index + 1,
         question,
         answer,
       }));
-  
-      // Prepare payload
+
       const payload = {
         userID: userId,
         questions: formattedAnswers,
-        time: (1200 - timeLeft).toString(), // Send remaining time
+        time: (20 * 60 - timeLeft).toString(),
       };
-  
+
       console.log("Payload being sent:", payload);
-  
-      // Send data to backend
+
       const response = await fetch(`${Backend_URL}/api/submitquestions`, {
         method: "POST",
         headers: {
@@ -110,48 +110,46 @@ const navigate = useNavigate();
         },
         body: JSON.stringify(payload),
       });
-  
-      if (!response.ok) {
-        throw new Error("Failed to submit answers");
-      }
-  
+
+      if (!response.ok) throw new Error("Failed to submit answers");
+
       const result = await response.json();
       console.log("Submission Successful:", result);
-  
-      // Remove timer and navigate
+
+      // Clear localStorage and navigate
       localStorage.removeItem("usertoken");
       localStorage.removeItem("quizTimeLeft");
+      localStorage.removeItem("quizAnswers");
       navigate("/thankyou");
     } catch (error) {
       console.error("Error submitting quiz:", error);
     }
   };
-  
 
+  // Format time display
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  // Handle answer input changes
   const handleAnswerChange = (questionId, value) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionId]: value,
-    }));
+    const updatedAnswers = { ...answers, [questionId]: value };
+    setAnswers(updatedAnswers);
+    localStorage.setItem("quizAnswers", JSON.stringify(updatedAnswers));
   };
+
   return (
     <div className="space-y-8">
       {/* Timer and Submit Button */}
       <div className="flex items-center justify-between bg-gray-800/50 p-4 rounded-xl border border-gray-700">
         <div className="flex items-center space-x-2">
           <Timer className="h-5 w-5 text-red-400" />
-          <span className="text-xl font-mono text-red-400">
-            {formatTime(timeLeft)}
-          </span>
+          <span className="text-xl font-mono text-red-400">{formatTime(timeLeft)}</span>
         </div>
         <button
-          onClick={handleSubmit}
+          onClick={() => handleSubmit(answers)} // Pass latest answers on manual submit
           className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         >
           Submit Quiz
@@ -170,24 +168,28 @@ const navigate = useNavigate();
                 : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50"
             }`}
           >
-            Table {tableNum}
+            {tableNum == 1?"Student table":null}
+            {tableNum == 2?"Team table":null}
+            {tableNum == 3?"Puzzle table":null}
+            {tableNum == 4? "Time table":null}
+            {tableNum == 5? "Hints table":null}
           </button>
         ))}
       </div>
-<div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-  <img
-    src={tableImages[selectedTable]}
-    alt={`Table ${selectedTable}`}
-    className="w-full object-cover rounded-lg" // Removed h-64 to allow full height
-  />
-</div>
+
+      {/* Image Display */}
+      <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+        <img
+          src={tableImages[selectedTable]}
+          alt={`Table ${selectedTable}`}
+          className="w-full object-cover rounded-lg"
+        />
+      </div>
+
       {/* Questions and Answer Inputs */}
       <div className="space-y-6">
         {questions.map((question) => (
-          <div
-            key={question.id}
-            className="bg-gray-800/50 p-6 rounded-xl border border-gray-700"
-          >
+          <div key={question.id} className="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
             <p className="text-lg mb-3">{question.question}</p>
             <textarea
               value={answers[question.question] || ""}
@@ -206,4 +208,3 @@ const navigate = useNavigate();
 }
 
 export default Quiz;
-

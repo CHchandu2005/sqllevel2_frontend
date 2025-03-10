@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClipboardList, Clock, AlertTriangle, MousePointer } from 'lucide-react';
+import { Clock, AlertTriangle,  Table } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function Instructions() {
@@ -10,24 +10,20 @@ function Instructions() {
     {
       icon: <Clock className="h-6 w-6 text-blue-400 mt-1" />,
       title: "Time Limit",
-      description: "You have 20 minutes to complete the quiz. The timer will continue even if you refresh the page.",
+      description: "You have 20 minutes to complete the event. Manage your time wisely to answer all questions.",
+    },
+    {
+      icon: <Table className="h-6 w-6 text-green-400 mt-1" />,
+      title: "Use Provided Tables",
+      description: "All answers must be derived from the given tables. Carefully analyze the data before selecting your response.",
     },
     {
       icon: <AlertTriangle className="h-6 w-6 text-yellow-400 mt-1" />,
-      title: "Browser Tab Restriction",
-      description: "Switching to other browser tabs will trigger a warning. The quiz will be auto-submitted if you proceed to switch tabs.",
-    },
-    {
-      icon: <MousePointer className="h-6 w-6 text-green-400 mt-1" />,
-      title: "Navigation",
-      description: "Use the table navigation buttons to view different SQL tables. Answer all questions based on the displayed table.",
-    },
-    {
-      icon: <ClipboardList className="h-6 w-6 text-purple-400 mt-1" />,
-      title: "Answering Questions",
-      description: "Type your SQL queries in the provided input fields. Copy-paste functionality is disabled for security.",
+      title: "Strict Tab Restriction",
+      description: "Do not switch tabs! If you do, the portal will automatically flag this action. Stay focused within the event interface.",
     },
   ];
+  
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">

@@ -170,7 +170,7 @@ function Login() {
         <div className="text-center">
           <Database className="mx-auto h-12 w-12 text-blue-400" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-            Welcome to SQL Quest
+            ! Welcome !
           </h2>
         </div>
         {error && <p className="text-red-400 text-center">{error}</p>}

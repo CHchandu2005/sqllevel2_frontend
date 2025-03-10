@@ -18,7 +18,7 @@ function Navbar() {
           <div className="flex items-center">
             <Database className="h-8 w-8 text-blue-400" />
             <span className="ml-2 text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-              SQL Quest
+              SQL Escape Room
             </span>
           </div>
           {user && (
