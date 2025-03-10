@@ -27,9 +27,9 @@ export const sampleQuestions = [
   ];
   
   export const tableImages = {
-    1: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80",
-    2: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=800&q=80",
-    3: "https://images.unsplash.com/photo-1633412802994-5c058f151b66?auto=format&fit=crop&w=800&q=80",
-    4: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-    5: "https://images.unsplash.com/photo-1526374870839-e155464bb9b2?auto=format&fit=crop&w=800&q=80"
+    1: "Studenttable.jpeg",
+    2: "Teamtable.jpeg",
+    3: "Puzzletable.jpeg",
+    4: "Timetable.jpeg",
+    5: "Hintstable.jpeg"
   };

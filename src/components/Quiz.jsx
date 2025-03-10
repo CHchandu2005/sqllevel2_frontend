@@ -174,16 +174,13 @@ const navigate = useNavigate();
           </button>
         ))}
       </div>
-
-      {/* Table Image */}
-      <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-        <img
-          src={tableImages[selectedTable]}
-          alt={`Table ${selectedTable}`}
-          className="w-full h-64 object-cover rounded-lg"
-        />
-      </div>
-
+<div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+  <img
+    src={tableImages[selectedTable]}
+    alt={`Table ${selectedTable}`}
+    className="w-full object-cover rounded-lg" // Removed h-64 to allow full height
+  />
+</div>
       {/* Questions and Answer Inputs */}
       <div className="space-y-6">
         {questions.map((question) => (
